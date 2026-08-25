@@ -25,12 +25,11 @@ jobs:
       - name: Pin the FFmpeg source revision
         shell: bash
         run: |
+          sed -i 's|REPO="${GITHUB_REPOSITORY:-btbn/ffmpeg-builds}"|REPO="btbn/ffmpeg-builds"|' util/vars.sh
           sed -i '/cd ffmpeg/a\\    git checkout 1fdbca85aa' build.sh
 
       - name: Build Linux x64 LGPL shared SDK
         shell: bash
-        env:
-          GITHUB_REPOSITORY: BtbN/FFmpeg-Builds
         run: ./build.sh linux64 lgpl-shared 7.1
 
       - name: Upload SDK archive

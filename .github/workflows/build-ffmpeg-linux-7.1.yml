@@ -1,0 +1,42 @@
+name: Build pinned FFmpeg Linux 7.1 SDK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        run: |
+          sudo apt-get clean
+          docker system prune -a -f
+          sudo rm -rf /opt/ghc /usr/local/.ghcup /usr/local/lib/android
+
+      - name: Check out pinned BtbN build definitions
+        uses: actions/checkout@v4
+        with:
+          repository: BtbN/FFmpeg-Builds
+          ref: 2437e7b868da3c11872367b15f3c613b87c24819
+
+      - name: Pin the FFmpeg source revision
+        shell: bash
+        run: |
+          sed -i '/cd ffmpeg/a\\    git checkout 1fdbca85aa' build.sh
+
+      - name: Build Linux x64 LGPL shared SDK
+        shell: bash
+        env:
+          GITHUB_REPOSITORY: BtbN/FFmpeg-Builds
+        run: ./build.sh linux64 lgpl-shared 7.1
+
+      - name: Upload SDK archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-linux64-lgpl-shared-7.1
+          path: artifacts/*.tar.xz
+          if-no-files-found: error
+          retention-days: 1

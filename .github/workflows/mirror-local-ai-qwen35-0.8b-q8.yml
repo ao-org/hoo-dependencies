@@ -1,0 +1,137 @@
+name: Mirror HOO local AI Qwen3.5 0.8B Q8 model
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/mirror-local-ai-qwen35-0.8b-q8.yml
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPOSITORY: ggml-org/Qwen3.5-0.8B-GGUF
+  UPSTREAM_REVISION: 316dea3b5462fd5755862bcec45a2f901bc0ba6b
+  UPSTREAM_FILENAME: Qwen3.5-0.8B-Q8_0.gguf
+  EXPECTED_SIZE: "833592096"
+  EXPECTED_SHA256: 37ae482d336108d23516fa35e8e0c4126688d81018b87178a18d752a1357814f
+  RELEASE_TAG: local-ai-qwen35-0.8b-q8-316dea3-v1
+  RELEASE_NAME: HOO Local AI - Qwen3.5 0.8B Q8_0
+  ASSET_NAME: hoo-assistant-qwen3.5-0.8b-q8-316dea3-v1.gguf
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether mirror already exists
+        id: existing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$ASSET_NAME"; then
+              echo "exists=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+
+      - name: Free runner disk space
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          sudo apt-get clean
+          docker system prune -a -f || true
+          sudo rm -rf /opt/ghc /usr/local/.ghcup /usr/local/lib/android || true
+
+      - name: Download pinned upstream GGUF
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://huggingface.co/$UPSTREAM_REPOSITORY/resolve/$UPSTREAM_REVISION/$UPSTREAM_FILENAME"
+          curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
+            --output "$UPSTREAM_FILENAME" "$url"
+
+      - name: Verify exact size and SHA-256
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          actual_size="$(stat -c '%s' "$UPSTREAM_FILENAME")"
+          if [[ "$actual_size" != "$EXPECTED_SIZE" ]]; then
+            echo "::error::Size mismatch: expected $EXPECTED_SIZE bytes, got $actual_size"
+            exit 1
+          fi
+
+          actual_sha="$(sha256sum "$UPSTREAM_FILENAME" | awk '{print $1}')"
+          if [[ "$actual_sha" != "$EXPECTED_SHA256" ]]; then
+            echo "::error::SHA-256 mismatch: expected $EXPECTED_SHA256, got $actual_sha"
+            exit 1
+          fi
+
+          mv "$UPSTREAM_FILENAME" "$ASSET_NAME"
+
+      - name: Create immutable mirror release
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          cat > release-notes.md <<EOF
+          # HOO Local AI model mirror
+
+          Immutable mirror of the approved local language model used by Heroes of Old.
+
+          ## Artifact
+
+          - HOO role: **HOO Assistant Small**
+          - Upstream model: **Qwen3.5-0.8B**
+          - Quantization: **Q8_0**
+          - Upstream repository: \`$UPSTREAM_REPOSITORY\`
+          - Upstream revision: \`$UPSTREAM_REVISION\`
+          - Upstream file: \`$UPSTREAM_FILENAME\`
+          - Mirrored asset: \`$ASSET_NAME\`
+          - Exact size: **$EXPECTED_SIZE bytes**
+          - SHA-256: \`$EXPECTED_SHA256\`
+          - License: **Apache-2.0**
+
+          Upstream source:
+          https://huggingface.co/$UPSTREAM_REPOSITORY/blob/$UPSTREAM_REVISION/$UPSTREAM_FILENAME
+
+          This release mirrors the verified upstream artifact without modification.
+          HOO consumers must pin this release asset and independently verify both
+          exact byte size and SHA-256 before installation.
+          EOF
+
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$RELEASE_NAME" \
+              --notes-file release-notes.md \
+              --target "$GITHUB_SHA"
+          fi
+
+          gh release upload "$RELEASE_TAG" "$ASSET_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber
+
+      - name: Verify published release asset metadata
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          published_size="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.name == env.ASSET_NAME) | .size')"
+          if [[ "$published_size" != "$EXPECTED_SIZE" ]]; then
+            echo "::error::Published asset size mismatch: expected $EXPECTED_SIZE, got $published_size"
+            exit 1
+          fi

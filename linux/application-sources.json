@@ -1,0 +1,68 @@
+[
+  {
+    "name": "stb",
+    "revision": "31c1ad37456438565541f4919958214b6e762fb4",
+    "license": "MIT",
+    "mirror": null,
+    "file": "stb-31c1ad37456438565541f4919958214b6e762fb4.tar.gz",
+    "archiveRoot": "stb",
+    "upstream": "https://github.com/nothings/stb.git",
+    "sha256": "ffa25739008dc25722ca874ffa8e5d4f43d1c971d24cc6faa295f6785b733ac1",
+    "size": 1505034
+  },
+  {
+    "name": "tomlplusplus",
+    "revision": "30172438cee64926dc41fdd9c11fb3ba5b2ba9de",
+    "license": "MIT",
+    "mirror": null,
+    "file": "tomlplusplus-30172438cee64926dc41fdd9c11fb3ba5b2ba9de.tar.gz",
+    "archiveRoot": "tomlplusplus",
+    "upstream": "https://github.com/marzer/tomlplusplus.git",
+    "sha256": "4cbb93511a2ca0b64f8edac1a6b556b5374b4d3bab3c3293b0a1d9f241178a54",
+    "size": 1286983
+  },
+  {
+    "name": "asio",
+    "revision": "c465349fa5cd91a64bb369f5131ceacab2c0c1c3",
+    "license": "BSL-1.0",
+    "mirror": null,
+    "file": "asio-c465349fa5cd91a64bb369f5131ceacab2c0c1c3.tar.gz",
+    "archiveRoot": "asio",
+    "upstream": "https://github.com/chriskohlhoff/asio.git",
+    "sha256": "2cc8799a6a4753fc96337d764e5bd2003227db55c460d6da7fe41bc9a14c236f",
+    "size": 2934037
+  },
+  {
+    "name": "SDL3",
+    "revision": "f87239e71e42da91ca317a12eefb82cfbf3393eb",
+    "license": "Zlib",
+    "mirror": null,
+    "file": "SDL3-f87239e71e42da91ca317a12eefb82cfbf3393eb.tar.gz",
+    "archiveRoot": "SDL3",
+    "upstream": "https://github.com/libsdl-org/SDL.git",
+    "sha256": "d7e017afdeb5528a5324b0b3793a681520fbe017d70d25144c97425e2df65947",
+    "size": 15656723
+  },
+  {
+    "name": "SDL3_mixer",
+    "revision": "72a81869b45e249e8e67102db4e98dd2441f05a1",
+    "license": "Zlib",
+    "mirror": null,
+    "file": "SDL3_mixer-72a81869b45e249e8e67102db4e98dd2441f05a1.tar.gz",
+    "archiveRoot": "SDL3_mixer",
+    "upstream": "https://github.com/libsdl-org/SDL_mixer.git",
+    "sha256": "51be458aa3992c0c153f1c8f77d7f6d9f81173694255b05ecebfd42431acf260",
+    "size": 5169413
+  },
+  {
+    "name": "googletest",
+    "revision": "52eb8108c5bdec04579160ae17225d66034bd723",
+    "license": "BSD-3-Clause",
+    "mirror": null,
+    "file": "googletest-52eb8108c5bdec04579160ae17225d66034bd723.tar.gz",
+    "archiveRoot": "googletest",
+    "upstream": "https://github.com/google/googletest.git",
+    "sha256": "784a133ef12c22588239e4abd07410fad8565281e74445c5b1bc52cd261f8b6e",
+    "size": 880070
+  }
+]
